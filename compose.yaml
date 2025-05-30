@@ -16,7 +16,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: Controllers/Dockerfile
+      dockerfile: Controller/Dockerfile
     container_name: exe-api-backend
     ports:
       - "8000:8080"

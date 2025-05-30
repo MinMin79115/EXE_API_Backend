@@ -9,6 +9,24 @@ using EXE_API_Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add CORS - Đọc từ configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactPolicy",
+        policy =>
+        {
+            // Đọc allowed origins từ appsettings.json
+            var corsSettings = builder.Configuration.GetSection("CorsSettings");
+            var allowedOrigins = corsSettings.GetSection("AllowedOrigins").Get<string[]>() 
+                ?? new[] { "http://localhost:3000" }; // Default nếu không config
+            
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        });
+});
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -75,6 +93,10 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseHttpsRedirection();
+
+// Add CORS middleware - Luôn dùng ReactPolicy
+app.UseCors("ReactPolicy");
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
