@@ -1,6 +1,5 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using System;
 
 namespace EXE_API_Backend.Models.Model
 {
@@ -8,24 +7,25 @@ namespace EXE_API_Backend.Models.Model
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string id { get; set; }
+        public string Id { get; set; }
+
+        [BsonElement("user_id")]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string UserId { get; set; }
 
         [BsonElement("to_email")]
-        public string toEmail { get; set; }
+        public string ToEmail { get; set; }
 
         [BsonElement("subject")]
-        public string subject { get; set; }
+        public string Subject { get; set; }
 
         [BsonElement("body")]
-        public string body { get; set; }
+        public string Body { get; set; }
 
         [BsonElement("sent_at")]
-        public DateTime sentAt { get; set; } = DateTime.UtcNow;
+        public DateTime SentAt { get; set; } = DateTime.UtcNow;
 
-        [BsonElement("is_sent")]
-        public bool isSent { get; set; } = false;
-
-        [BsonElement("error_message")]
-        public string errorMessage { get; set; } = string.Empty;
+        [BsonElement("status")]
+        public string Status { get; set; } = "sent";
     }
 } 

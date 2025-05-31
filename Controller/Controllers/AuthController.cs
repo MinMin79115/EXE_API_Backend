@@ -32,40 +32,39 @@ namespace EXE_API_Backend.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromForm] LoginModel model)
+        public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            var user = await _unitOfWork.UserRepository.GetByUsernameAsync(model.userName);
-            if (user != null && VerifyPassword(model.password, user.passwordHash))
+            var user = await _unitOfWork.UserRepository.GetByUsernameAsync(model.UserName);
+            if (user != null && VerifyPassword(model.Password, user.PasswordHash))
             {
-                var token = GenerateJwtToken(user.userName, user.role.ToString());
-                var refreshToken = await _refreshTokenService.GenerateRefreshToken(user.userName);
-                return StatusCode(200, ApiResponse<object>.Ok(200, new { AccessToken = token, RefreshToken = refreshToken }, "Login successful"));
+                var token = GenerateJwtToken(user.UserName, user.Role.ToString());
+                var refreshToken = await _refreshTokenService.GenerateRefreshToken(user.UserName);
+                return Ok(new { token, refreshToken });
             }
-
-            return StatusCode(401, ApiResponse<string>.Error(401, "Invalid username or password"));
+            return Unauthorized("Invalid credentials");
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromForm] RegisterModel model)
+        public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            var existingUser = await _unitOfWork.UserRepository.GetByUsernameAsync(model.userName);
+            var existingUser = await _unitOfWork.UserRepository.GetByUsernameAsync(model.UserName);
             if (existingUser != null)
             {
-                return StatusCode(400, ApiResponse<string>.Error(400, "Username already exists"));
+                return BadRequest("Username already exists");
             }
 
-            var existingEmail = await _unitOfWork.UserRepository.GetByEmailAsync(model.email);
+            var existingEmail = await _unitOfWork.UserRepository.GetByEmailAsync(model.Email);
             if (existingEmail != null)
             {
-                return StatusCode(400, ApiResponse<string>.Error(400, "Email already exists"));
+                return BadRequest("Email already registered");
             }
 
-            var user = new Models.Model.User
+            var user = new User
             {
-                userName = model.userName,
-                passwordHash = HashPassword(model.password),
-                email = model.email,
-                fullName = model.fullName
+                UserName = model.UserName,
+                PasswordHash = HashPassword(model.Password),
+                Email = model.Email,
+                FullName = model.FullName
             };
 
             await _unitOfWork.UserRepository.AddAsync(user);
@@ -89,7 +88,7 @@ namespace EXE_API_Backend.Controllers
                 return StatusCode(401, ApiResponse<string>.Error(401, "User not found"));
             }
 
-            var newAccessToken = GenerateJwtToken(user.userName, user.role.ToString());
+            var newAccessToken = GenerateJwtToken(user.UserName, user.Role.ToString());
             var newRefreshToken = await _refreshTokenService.GenerateRefreshToken(request.UserId);
             await _refreshTokenService.RevokeRefreshToken(request.UserId, request.RefreshToken);
             return StatusCode(200, ApiResponse<object>.Ok(200, new { AccessToken = newAccessToken, RefreshToken = newRefreshToken }, "Token refreshed successfully"));

@@ -18,21 +18,20 @@ namespace EXE_API_Backend.Services
         {
             var refreshToken = new RefreshToken
             {
-                token = Guid.NewGuid().ToString(),
-                userId = userId,
-                expiryDate = DateTime.UtcNow.AddDays(7),
-                isRevoked = false
+                Token = Guid.NewGuid().ToString(),
+                UserId = userId,
+                ExpiresAt = DateTime.UtcNow.AddDays(7)
             };
 
             await _unitOfWork.RefreshTokenRepository.AddAsync(refreshToken);
             await _unitOfWork.CommitAsync();
-            return refreshToken.token;
+            return refreshToken.Token;
         }
 
         public async Task<bool> ValidateRefreshToken(string userId, string refreshToken)
         {
             var token = await _unitOfWork.RefreshTokenRepository.GetByUserIdAndTokenAsync(userId, refreshToken);
-            if (token == null || token.isRevoked || token.expiryDate < DateTime.UtcNow)
+            if (token == null || token.ExpiresAt < DateTime.UtcNow)
             {
                 return false;
             }
@@ -44,8 +43,7 @@ namespace EXE_API_Backend.Services
             var token = await _unitOfWork.RefreshTokenRepository.GetByUserIdAndTokenAsync(userId, refreshToken);
             if (token != null)
             {
-                token.isRevoked = true;
-                await _unitOfWork.RefreshTokenRepository.UpdateAsync(token.id, token);
+                await _unitOfWork.RefreshTokenRepository.DeleteAsync(token.Id);
                 await _unitOfWork.CommitAsync();
             }
         }

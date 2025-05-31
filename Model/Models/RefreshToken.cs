@@ -7,18 +7,19 @@ namespace EXE_API_Backend.Models.Model
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string id { get; set; }
-
-        [BsonElement("token")]
-        public string token { get; set; }
+        public string Id { get; set; }
 
         [BsonElement("user_id")]
-        public string userId { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string UserId { get; set; }
 
-        [BsonElement("expiry_date")]
-        public DateTime expiryDate { get; set; }
+        [BsonElement("token")]
+        public string Token { get; set; }
 
-        [BsonElement("is_revoked")]
-        public bool isRevoked { get; set; } = false;
+        [BsonElement("expires_at")]
+        public DateTime ExpiresAt { get; set; }
+
+        [BsonElement("created_at")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 } 
